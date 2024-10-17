@@ -33,6 +33,10 @@ def my_nested_flow(msg):
 
 
 if __name__ == "__main__":
-    test_flow()
+    test_flow().deploy(
+        name='prefect-test',
+        work_pool_name='weather-work-pool',
+        work_queue_name='weather-queue',
+    )
 
 
