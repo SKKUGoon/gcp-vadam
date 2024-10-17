@@ -1,7 +1,7 @@
 from prefect import flow, task
-from krx_index.main import kospi, kospi200
+from krx_index.main import kospi, kospi200, wics
 from database.datetime_utility import avail_date_check
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 
@@ -15,6 +15,7 @@ def update_krx_index():
     if proceed:
         wrap_kospi(dt)  # to nimbus.kospi
         wrap_kospi200(dt)  # to nimbus.kospi200
+        wics(dt - timedelta(days=1))
 
 
 @task
@@ -30,6 +31,11 @@ def wrap_kospi(dt: datetime):
 @task
 def wrap_kospi200(dt: datetime):
     kospi200(dt)
+
+
+@task
+def wrap_wics(dt: datetime):
+    wics(dt)
 
 
 if __name__ == "__main__":

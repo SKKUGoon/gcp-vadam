@@ -5,7 +5,53 @@ import requests
 from datetime import datetime
 
 from database.access import SDA
+from database.web_crawl_utility import RateLimit
 from krx_index.common import nearest_fwd_weekday
+
+
+def wics(dt: datetime):
+    # Energy
+    # Material
+    # Industrials
+    # Consumer Discretionary
+    # Consumer Staples
+    # Health Care
+    # Financials and Real Estate
+    # Information Technology
+    # Communication Services
+    # Utilities
+    url = "https://www.wiseindex.com/Index/GetIndexComponets"
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'}
+    sectors = ("G10", "G15", "G20", "G25", "G30", "G35", "G40", "G45", "G50", "G55")
+
+    # WICS instead of GICS (bloomberg only)
+    db = SDA()
+    lim = RateLimit()
+
+    result = list()
+
+    for s in sectors:
+        data = {
+            "ceil_yn": 0,
+            "dt": dt.strftime("%Y%m%d"),
+            "sec_cd": s
+        }
+
+        response = requests.get(url, data=data, headers=headers)
+        lim.tick()
+
+        if response.status_code == 200:
+            sector_info = response.json()
+            stocks = map(lambda x: [x["CMP_CD"], x["SEC_NM_KOR"]], sector_info["list"])
+            result.extend(stocks)
+        else:
+            raise FileNotFoundError("failed request")
+    lim.reset()
+
+    result = pd.DataFrame(result, columns=["stock_cd", "sector"])
+    result["year"] = [dt.year] * len(result)
+    result["month"] = [dt.month] * len(result)
+    db.insert_dataframe(result, "wics", "nimbus")
 
 
 def kospi200(dt: datetime):
