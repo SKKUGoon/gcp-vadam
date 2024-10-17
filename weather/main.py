@@ -161,7 +161,7 @@ class KoreaWeather(WeatherAPI):
 
         db = SDA()
         df = db.select_sql_dataframe("select * from nimbus.station", verbose=False)
-
+        print(db.engine_str)
         new_id = [id for id in stations['stn_id'] if id not in df['stn_id'].tolist()]
         _dep_id = [id for id in df['stn_id'] if id not in stations['stn_id'].tolist()]  # Update is_deleted later
 
