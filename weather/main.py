@@ -172,7 +172,7 @@ class KoreaWeather(WeatherAPI):
         # Insert Weather information (Time)
         # Insert Weather information (Day)
         basic_weather = self.get_temperature_time(date)
-        basic_weather['datetime_str'] = basic_weather['datetime_str'].apply(lambda x: x[:8])
+        # basic_weather['datetime_str'] = basic_weather['datetime_str'].apply(lambda x: x[:8])
 
         print(basic_weather)
         basic_weather = basic_weather.loc[basic_weather['stn_id'].isin(stations['stn_id'])]
