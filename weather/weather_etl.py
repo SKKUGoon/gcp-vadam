@@ -7,7 +7,7 @@ def test_flow() -> str:
     test_task1()  # Flow can call tasks
     test_task2()
     check_env()  # Check inserted envs
-    my_nested_flow()  # Flow can call nested flows
+    my_nested_flow("something something about you")  # Flow can call nested flows
     return "Hello, world!"
 
 
