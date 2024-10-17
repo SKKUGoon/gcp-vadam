@@ -1,13 +1,13 @@
 from prefect import flow, task
 from weather.main import KoreaWeather
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 
 @flow(name="daily weather update", log_prints=True)
 def update_weather() -> str:
     KST = pytz.timezone('Asia/Seoul')
-    dt = datetime.now(KST)
+    dt = datetime.now(KST) - timedelta(days=1)
 
     # Start Each Task
     korea_weather(dt)

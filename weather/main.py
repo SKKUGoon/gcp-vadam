@@ -18,7 +18,7 @@ class WeatherAPI(ABC):
 
 class KoreaWeather(WeatherAPI):
     def __init__(self) -> None:
-        super(None).__init__()
+        super().__init__()
         
         envkey = "APIKEY_KOREA_WEATHER"
         self.url = "https://apihub.kma.go.kr/api/typ01/url/"
@@ -150,7 +150,7 @@ class KoreaWeather(WeatherAPI):
         
         return pd.DataFrame(data_lines, columns=column_names)
 
-    def run(self, date: datetime | None = None):
+    def run(self, date: datetime | None = None, test: bool = False):
         if date is None:
             date = datetime.now()
 
@@ -160,22 +160,22 @@ class KoreaWeather(WeatherAPI):
         stations['is_deleted'] = [False] * len(stations)
 
         db = SDA()
-        df = db.select_sql_dataframe("select * from lake.station", verbose=False)
+        df = db.select_sql_dataframe("select * from nimbus.station", verbose=False)
 
         new_id = [id for id in stations['stn_id'] if id not in df['stn_id'].tolist()]
         _dep_id = [id for id in df['stn_id'] if id not in stations['stn_id'].tolist()]  # Update is_deleted later
 
         stations_insertible = stations.loc[stations['stn_id'].isin(new_id)]
-        if len(stations_insertible) > 0:
-            db.insert_dataframe(stations_insertible, "station", "lake")
+        if not test and len(stations_insertible) > 0:
+            db.insert_dataframe(stations_insertible, "station", "nimbus")
 
         # Insert Weather information (Time)
         # Insert Weather information (Day)
         basic_weather = self.get_temperature_date(date)
         basic_weather['datetime_str'] = basic_weather['datetime_str'].apply(lambda x: x[:8])
         basic_weather = basic_weather.loc[basic_weather['stn_id'].isin(stations['stn_id'])]
-        if len(basic_weather) > 0:
-            db.insert_dataframe(basic_weather, "measurements_day", "lake")
+        if not test and len(basic_weather) > 0:
+            db.insert_dataframe(basic_weather, "measurements_day", "nimbus")
 
         return
 
