@@ -1,6 +1,6 @@
 from prefect import flow, task
 from weather.main import KoreaWeather
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 
 
