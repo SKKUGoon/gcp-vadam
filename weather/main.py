@@ -18,7 +18,7 @@ class WeatherAPI(ABC):
 
 class KoreaWeather(WeatherAPI):
     def __init__(self) -> None:
-        super().__init__()
+        super(None).__init__()
         
         envkey = "APIKEY_KOREA_WEATHER"
         self.url = "https://apihub.kma.go.kr/api/typ01/url/"

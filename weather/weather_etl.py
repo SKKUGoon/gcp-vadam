@@ -1,44 +1,27 @@
 from prefect import flow, task
-from weather.main import WeatherAPI
-import os
+from weather.main import KoreaWeather
+from datetime import datetime
+import pytz
 
 
-@flow(name="test flow", log_prints=True)
-def test_flow() -> str:
-    test_task1()  # Flow can call tasks
-    test_task2()
-    check_env()  # Check inserted envs
-    my_nested_flow("something something about you")  # Flow can call nested flows
-    return "Hello, world!"
+@flow(name="daily weather update", log_prints=True)
+def update_weather() -> str:
+    KST = pytz.timezone('Asia/Seoul')
+    dt = datetime.now(KST)
 
-
-@task
-def test_task1():
-    b = WeatherAPI(envfile=None)
-    print("Test Task 1!")
-
+    # Start Each Task
+    korea_weather(dt)
+    
 
 @task
-def test_task2():
-    print("Test Task 2!")
-
-
-@task
-def check_env():
-    print("weather api", os.getenv("APIKEY_KOREA_WEATHER"))
-    print("weather api", os.getenv("PG_HOST"))
-
-
-@flow(name="nested flow")
-def my_nested_flow(msg):
-    print(f"Nestedflow says: {msg}")
+def korea_weather(dt: datetime):
+    kw = KoreaWeather()
+    kw.run(dt)
 
 
 if __name__ == "__main__":
-    test_flow().deploy(
-        name='prefect-test',
+    update_weather().deploy(
+        name='weather',
         work_pool_name='weather-work-pool',
-        work_queue_name='weather-queue',
+        work_queue_name='weather-queue'
     )
-
-
