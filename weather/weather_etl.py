@@ -5,7 +5,7 @@ import pytz
 
 
 @flow(name="daily weather update", log_prints=True)
-def update_weather() -> str:
+def update_weather():
     KST = pytz.timezone('Asia/Seoul')
     dt = datetime.now(KST)
     dt = dt.replace(minute=0, second=0)

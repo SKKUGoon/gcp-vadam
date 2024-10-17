@@ -96,7 +96,7 @@ class KoreaWeather(WeatherAPI):
             "help": 1,
             "authKey": self.apikey
         }
-        print(self.url + endpoint, param)
+
         resp = requests.get(self.url + endpoint, params=param)
         if resp.status_code != 200:
             raise RuntimeError(resp.text)
@@ -174,7 +174,6 @@ class KoreaWeather(WeatherAPI):
         basic_weather = self.get_temperature_time(date)
         # basic_weather['datetime_str'] = basic_weather['datetime_str'].apply(lambda x: x[:8])
 
-        print(basic_weather)
         basic_weather = basic_weather.loc[basic_weather['stn_id'].isin(stations['stn_id'])]
         if not test and len(basic_weather) > 0:
             db.insert_dataframe(basic_weather, "measurements_time", "nimbus")
