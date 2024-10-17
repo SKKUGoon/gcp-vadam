@@ -10,8 +10,9 @@ from database.access import SDA
 
 
 class WeatherAPI(ABC):
-    def __init__(self, envfile: str = ".env") -> None:
-        load_dotenv(envfile)
+    def __init__(self, envfile: str | None = ".env") -> None:
+        if envfile is not None:
+            load_dotenv(envfile)
         pass
 
 

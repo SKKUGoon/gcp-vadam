@@ -1,4 +1,5 @@
 from prefect import flow, task
+from weather.main import WeatherAPI
 import os
 
 
@@ -13,6 +14,7 @@ def test_flow() -> str:
 
 @task
 def test_task1():
+    b = WeatherAPI(envfile=None)
     print("Test Task 1!")
 
 
