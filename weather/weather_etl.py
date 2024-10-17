@@ -7,7 +7,8 @@ import pytz
 @flow(name="daily weather update", log_prints=True)
 def update_weather() -> str:
     KST = pytz.timezone('Asia/Seoul')
-    dt = datetime.now(KST) - timedelta(days=1)
+    dt = datetime.now(KST)
+    dt = dt.replace(minute=0, second=0)
 
     # Start Each Task
     korea_weather(dt)
