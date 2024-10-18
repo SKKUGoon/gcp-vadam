@@ -59,12 +59,3 @@ def avail_hist_ym_first_date(start_date: datetime, end_date: datetime):
         return list(map(lambda x: datetime(x[0], x[1], x[2]), my_cal.to_numpy()))
     else:
         return []
-
-
-if __name__ == "__main__":
-    # print(avail_date_check(datetime(2022, 3, 2)))
-    s = avail_hist_ym_first_date(
-        datetime(2022, 1, 1),
-        datetime(2022, 5, 1)
-    )
-    print(s)
