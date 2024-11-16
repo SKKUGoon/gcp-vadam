@@ -53,7 +53,9 @@ def insert_dataframe(dt: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    update_calendar(4).from_source(
+    update_calendar.with_options(
+        parameters={"month_ahead": 4}
+    ).from_source(
         source="https://github.com/SKKUGoon/gcp-vadam.git",
         entrypoint="calendar_base/calendar_etl.py:update_calendar"
     ).deploy(
