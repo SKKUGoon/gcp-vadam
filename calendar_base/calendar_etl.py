@@ -28,9 +28,13 @@ def update_calendar(month_ahead: int = 0):
     holi = holi.drop_duplicates(subset=['day_str'])
 
     # Insert future calendar
-    dt = pd.merge(dts, holi, how='left', on=['day_str'])
-    print(dt['day_str'].tolist()[0], "~", dt['day_str'].tolist()[-1])
-    insert_dataframe(dt)
+    cal = pd.merge(dts, holi, how='left', on=['day_str'])
+    
+    # Log
+    print("exec", dt, "month ahead", month_ahead)
+    print(cal['day_str'].tolist()[0], "~", cal['day_str'].tolist()[-1])
+    
+    insert_dataframe(cal)
 
 
 @task
