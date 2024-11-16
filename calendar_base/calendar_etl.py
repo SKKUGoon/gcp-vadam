@@ -29,6 +29,7 @@ def update_calendar(month_ahead: int = 0):
 
     # Insert future calendar
     dt = pd.merge(dts, holi, how='left', on=['day_str'])
+    print(dt['day_str'].tolist()[0], "~", dt['day_str'].tolist()[-1])
     insert_dataframe(dt)
 
 
@@ -55,4 +56,3 @@ if __name__ == "__main__":
         name='calendar',
         work_pool_name='data-etl',
     )
-
