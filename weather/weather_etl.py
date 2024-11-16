@@ -23,6 +23,6 @@ def korea_weather(dt: datetime):
 if __name__ == "__main__":
     update_weather().deploy(
         name='weather',
-        work_pool_name='weather-work-pool',
+        work_pool_name='Weather work pool',
         work_queue_name='weather-queue'
     )
