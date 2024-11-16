@@ -39,8 +39,10 @@ def wrap_wics(dt: datetime):
 
 
 if __name__ == "__main__":
-    update_krx_index().deploy(
+    update_krx_index().from_source(
+        source="https://github.com/SKKUGoon/gcp-vadam.git",
+        entrypoint="krx_index/krx_etl.py:update_krx_index"
+    ).deploy(
         name='krx-index',
-        work_pool_name='kis-work-pool',
-        work_queue_name='krx-index-queue'
+        work_pool_name='data-etl',
     )

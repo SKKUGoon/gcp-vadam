@@ -26,5 +26,5 @@ if __name__ == "__main__":
         entrypoint="weather/weather_etl.py:update_weather"
     ).deploy(
         name='weather',
-        work_pool_name='data-orchestration',
+        work_pool_name='data-etl',
     )
