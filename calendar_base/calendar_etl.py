@@ -48,9 +48,11 @@ def insert_dataframe(dt: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    update_calendar(4).deploy(
+    update_calendar(4).from_source(
+        source="https://github.com/SKKUGoon/gcp-vadam.git",
+        entrypoint="calendar_base/calendar_etl.py:update_calendar"
+    ).deploy(
         name='calendar',
-        work_pool_name='kis-work-pool',
-        work_queue_name='calendar-queue'
+        work_pool_name='data-etl',
     )
 
