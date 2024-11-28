@@ -114,3 +114,31 @@ create table if not exists {target_schema}.{target_table} (
         gdf = gpd.read_postgis(sql_statement, con=engine, geom_col=geometry_column)
         engine.dispose()
         return gdf
+
+    def insert_geodataframe(self,
+                            data: gpd.GeoDataFrame,
+                            target_table: str, 
+                            target_schema: str,
+                            if_exists: Literal['append', 'replace'] = 'append',
+                            verbose: bool = True):
+        """Insert a GeoDataFrame into PostGIS table"""
+        engine = create_engine(self.engine_str)
+        
+        # Ensure the GeoDataFrame has EPSG:4326 projection
+        if data.crs is None:
+            raise ValueError("GeoDataFrame must have a CRS defined")
+        if data.crs.to_epsg() != 4326:
+            data = data.to_crs(epsg=4326)
+            
+        try:
+            data.to_postgis(
+                target_table,
+                engine,
+                schema=target_schema,
+                if_exists=if_exists,
+                index=False
+            )
+            if verbose:
+                print(f"Inserted {len(data)} rows into {target_schema}.{target_table}")
+        finally:
+            engine.dispose()
