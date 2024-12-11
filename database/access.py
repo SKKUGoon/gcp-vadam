@@ -46,7 +46,7 @@ create table if not exists {target_schema}.{target_table} (
                 return "BIGINT"
             return "INTEGER"
         elif pd.api.types.is_float_dtype(series):
-            return "FLOAT"
+            return "FLOAT4"
         elif pd.api.types.is_datetime64_any_dtype(series):
             return "TIMESTAMP"
         elif pd.api.types.is_bool_dtype(series):
