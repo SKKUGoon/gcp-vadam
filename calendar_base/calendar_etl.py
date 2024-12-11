@@ -25,14 +25,14 @@ def update_calendar(month_ahead: int = 0):
 
     dts = wrap_gen_full_calendar(start_date, end_date)
     holi = wrap_gen_available_dates(start_date, end_date)
-    holi = holi.drop_duplicates(subset=['day_str'])
+    holi = holi.drop_duplicates(subset=['date_str'])
 
     # Insert future calendar
-    cal = pd.merge(dts, holi, how='left', on=['day_str'])
+    cal = pd.merge(dts, holi, how='left', on=['date_str'])
     
     # Log
     print("exec", dt, "month ahead", month_ahead)
-    print(cal['day_str'].tolist()[0], "~", cal['day_str'].tolist()[-1])
+    print(cal['date_str'].tolist()[0], "~", cal['date_str'].tolist()[-1])
     
     insert_dataframe(cal)
 

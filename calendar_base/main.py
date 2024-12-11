@@ -31,7 +31,7 @@ def generate_full_calendar(s: datetime, e: datetime):
         row.append(d)
         ptr += timedelta(days=1)
 
-    return pd.DataFrame(row, columns=["year", "month", "day", "day_str", "weekday", "month_first_day", "month_last_day"])
+    return pd.DataFrame(row, columns=["year", "month", "day", "date_str", "weekday", "month_first_day", "month_last_day"])
 
 
 def exchange_calendar_response(date_dict: dict):
@@ -72,4 +72,4 @@ def generate_available_dates(s: datetime, e: datetime):
         row += data
 
     kis.drop_oauth()
-    return pd.DataFrame(row, columns=['day_str', 'business_day', 'trade_day', 'exchange_opened_day', 'settle_day'])
+    return pd.DataFrame(row, columns=['date_str', 'business_day', 'trade_day', 'exchange_opened_day', 'settle_day'])
