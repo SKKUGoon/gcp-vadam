@@ -1,5 +1,6 @@
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 from datetime import datetime
 
 
@@ -31,7 +32,25 @@ def long_foreigner(path: str, date: datetime):
 
     # Clean data types
     data["hour"] = data["hour"].astype(int)
-    data[["total_population", "chinese", "non_chinese"]] = data[["total_population", "chinese", "non_chinese"]].replace("*", 0)
+    data[["total_population", "chinese", "non_chinese"]] = data[["total_population", "chinese", "non_chinese"]].replace("*", None)
+    data[["total_population", "chinese", "non_chinese"]] = data[["total_population", "chinese", "non_chinese"]].astype(float)
+
+    return data
+
+
+def short_foreigner(path: str, date: datetime):
+    date_str = date.strftime("%Y%m%d")
+    try: 
+        data = pd.read_csv(path + f"/TEMP_FOREIGNER_{date_str}.csv")
+    except UnicodeDecodeError:
+        data = pd.read_csv(path + f"/TEMP_FOREIGNER_{date_str}.csv", encoding="euc-kr")
+
+    data.columns = ["date_str", "hour", "hjd_code", "sec_code", "total_population", "chinese", "non_chinese"]
+    data = data[["date_str", "hour", "sec_code", "total_population", "chinese", "non_chinese"]]
+
+    # Clean data types
+    data["hour"] = data["hour"].astype(int)
+    data[["total_population", "chinese", "non_chinese"]] = data[["total_population", "chinese", "non_chinese"]].replace("*", None)
     data[["total_population", "chinese", "non_chinese"]] = data[["total_population", "chinese", "non_chinese"]].astype(float)
 
     return data
@@ -57,7 +76,7 @@ def locals(path: str, date: datetime):
     # Clean data types
     cols = [c for c in data.columns if c.startswith("male") or c.startswith("female")] + ["total_population"]
     data = data[["date_str", "hour", "sec_code", *cols]]
-    data[cols] = data[cols].replace("*", 0)
+    data[cols] = data[cols].replace("*", None)
     data[cols] = data[cols].astype(float)
 
     return data
