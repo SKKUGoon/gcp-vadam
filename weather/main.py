@@ -44,7 +44,9 @@ class KoreaWeather(WeatherAPI):
             "stn_cd2", "stn_nm_kor", "stn_nm_eng", "fct_cd", "pnu_bjd", "-"
         ]
         float_columns = ["lng", "lat", "ht", "ht_pa", "ht_ta", "st_wd", "st_rn"]
-        stations = self.parser(resp.text, column_names)[[c for c in column_names  if c != "-"]]
+
+        # Override some station names - Korea is weird
+        stations = self.parser(resp.text, column_names, override=True)[[c for c in column_names  if c != "-"]]
         stations[float_columns] = stations[float_columns].map(float)
 
         return stations
@@ -86,6 +88,58 @@ class KoreaWeather(WeatherAPI):
         basic_weather = self.parser(resp.text, column_names)[[c for c in column_names if not c.startswith("_")]]
         basic_weather[float_columns] = basic_weather[float_columns].map(float)
 
+        # Data manipulation
+        # Split datetime_str into date_str and hour columns
+        basic_weather['date_str'] = basic_weather['datetime_str'].str[:8]
+        basic_weather['hour'] = basic_weather['datetime_str'].str[8:10].astype(int)
+        basic_weather = basic_weather.drop('datetime_str', axis=1)
+
+        return basic_weather
+    
+    def get_temperature_time_period(self, date_start: datetime, date_end: datetime):
+        endpoint = "kma_sfctm3.php"
+        param = {
+            "tm1": date_start.strftime("%Y%m%d%H%M"),
+            "tm2": date_end.strftime("%Y%m%d%H%M"),
+            "stn": 0,
+            "help": 1,
+            "authKey": self.apikey
+        }
+
+        resp = requests.get(self.url + endpoint, params=param)
+        if resp.status_code != 200:
+            raise RuntimeError(resp.text)
+        
+        column_names = [
+            "datetime_str", "stn_id", "wind_direction", "wind_speed", 
+            "gust_direction", "gust_speed", "gust_time", 
+            "ground_hpa", "sealevel_hpa", "_pt", "_pr",
+            "temperature", "_td", "humidity", "_pv", 
+            "rain", "rain_day1", "rain_day2", "rain_strength",
+            "snow_3hours", "snow_day", "snow_cumul", 
+            "_wc", "_wp", "weather_report", 
+            "cloud_total", "cloud_mid_ht", "cloud_min_ht",
+            "cloud_type", "_ct_top", "_ct_mid", "_ct_low", 
+            "visibility", "sun", "_si", 
+            "status_ground", "temperature_ground", "_te005", "_te010", "_te020", "_te030",
+            "status_sealevel", "wave", "_bf", "is_raining", "_ix",
+        ]
+        float_columns = [
+            "wind_direction", "wind_speed", "gust_direction", "gust_speed",
+            "ground_hpa", "sealevel_hpa", "temperature", "humidity", "rain", 
+            "rain_day1", "rain_day2", "rain_strength", "snow_3hours", "snow_day", 
+            "snow_cumul", "cloud_total", "cloud_mid_ht", "cloud_min_ht", 
+            "visibility", "temperature_ground", "wave",
+        ]
+        basic_weather = self.parser(resp.text, column_names)[[c for c in column_names if not c.startswith("_")]]
+        basic_weather[float_columns] = basic_weather[float_columns].map(float)
+
+        # Data manipulation
+        # Split datetime_str into date_str and hour columns
+        basic_weather['date_str'] = basic_weather['datetime_str'].str[:8]
+        basic_weather['hour'] = basic_weather['datetime_str'].str[8:10].astype(int)
+        basic_weather = basic_weather.drop('datetime_str', axis=1)
+
         return basic_weather
 
     def get_temperature_date(self, date: datetime):
@@ -125,12 +179,20 @@ class KoreaWeather(WeatherAPI):
         basic_weather = self.parser(resp.text, column_names)[[c for c in column_names if not c.startswith("_")]]
         basic_weather[float_columns] = basic_weather[float_columns].map(float)
 
+        basic_weather['date_str'] = basic_weather['datetime_str'].str[:8]
+        basic_weather['hour'] = basic_weather['datetime_str'].str[8:10].astype(int)
+        basic_weather = basic_weather.drop('datetime_str', axis=1)
+
         return basic_weather
 
     @staticmethod
-    def parser(text: str, column_names):
+    def parser(text: str, column_names, override: bool = False):
         start_token, end_token = "#START7777", "#7777END"
         
+        if override:
+            text = text.replace("Jeongseon Gun", "Jeongseon")
+            text = text.replace("Gangjin Gun", "Gangjin")
+
         start_index = text.find(start_token)
         end_index = text.find(end_token, start_index)
         if start_index == -1 or end_index == -1:
@@ -143,23 +205,26 @@ class KoreaWeather(WeatherAPI):
         lines = [line for line in lines if line.strip() != '']  # Remove empty lines
         
         data_lines = [
-            [l for l in line.split(' ') if l != ''] 
+            [l for l in line.split(' ') if l != '']
             for line in lines if not line.strip().startswith('#')
         ]
         data_lines = [l for l in data_lines if len(l) == len(column_names)]
         
         return pd.DataFrame(data_lines, columns=column_names)
 
-    def run(self, date: datetime | None = None, test: bool = False):
+    def run(self, date: datetime | None = None, test: bool = False, db: SDA | None = None):
         if date is None:
             date = datetime.now()
+
+        if db is None:
+            # If db is not provided, use the default SDA
+            db = SDA()
 
         # Update station information
         stations = self.get_station_information(date)
         stations['updated_date'] = [date] * len(stations)
         stations['is_deleted'] = [False] * len(stations)
 
-        db = SDA()
         df = db.select_sql_dataframe("select * from nimbus.station", verbose=False)
         
         new_id = [id for id in stations['stn_id'] if id not in df['stn_id'].tolist()]
@@ -176,7 +241,7 @@ class KoreaWeather(WeatherAPI):
 
         basic_weather = basic_weather.loc[basic_weather['stn_id'].isin(stations['stn_id'])]
         if not test and len(basic_weather) > 0:
-            db.insert_dataframe(basic_weather, "measurements_time", "nimbus")
+            db.insert_dataframe(basic_weather, "station_measure_time", "nimbus")
 
         return
 
