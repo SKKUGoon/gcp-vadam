@@ -170,3 +170,4 @@ test.py
 *.xlsm
 *.xlsb
 assets/
+*.ipynb
