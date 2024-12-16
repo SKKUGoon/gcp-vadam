@@ -1,14 +1,6 @@
 -- Enable PostGIS extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- Create table: locations
-CREATE TABLE nimbus.locations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    location_type VARCHAR NOT NULL,
-    location_name VARCHAR NOT NULL,
-    geometry GEOMETRY(POINT, 4326) NOT NULL
-);
-
 -- Create table: hjd
 CREATE TABLE nimbus.hjd (
     sido_cd VARCHAR NOT NULL,

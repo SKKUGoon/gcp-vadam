@@ -171,3 +171,4 @@ test.py
 *.xlsb
 assets/
 *.ipynb
+test*.ipynb
